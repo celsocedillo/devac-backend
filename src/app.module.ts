@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { enviroments } from './enviroments';
 import { SeguridadModule } from './seguridad/seguridad.module';
 import { CorrespondenciaModule } from './correspondencia/correspondencia.module';
+import { ActivosModule } from './activos/activos.module';
 import config from './config';
 
 
@@ -19,7 +20,7 @@ import config from './config';
       
     }),
     GeneralesModule, 
-    DatabaseModule, SeguridadModule, CorrespondenciaModule],
+    DatabaseModule, SeguridadModule, CorrespondenciaModule, ActivosModule],
   controllers: [AppController],
   providers: [AppService],
 })
