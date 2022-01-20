@@ -57,4 +57,37 @@ export class SeguridadService {
         const accessToken = this.jwtService.sign(payload);
         return accessToken;
     }
+
+    async getOpcionesByUsuario(user: string){
+        const manager = getManager();
+        const query = `select max(view_id) "id", menu_id "menuId",max(tipo) "tipo", max(forma) "forma", 
+                        max(label_menu) "labelMenu", max(orden_query) "ordenQuery", max(padre_id) "padreId"
+                        from erco.esgvw_opcion_usuario 
+                        where usuario = '${user}' 
+                        and aplicacion_id = 'Devac'
+                        and habilitar_opcion = 'S'
+                        group by menu_id
+                        order by "ordenQuery"`
+        const result = await manager.query(query);
+        return result
+    }
+
+
+    async getModulosByUsuario(user: string){
+        const manager = getManager();
+        const query = `select max(view_id) "id", menu_id "menuId",max(tipo) "tipo", max(forma) "forma", 
+                        max(label_menu) "labelMenu", max(orden_query) "ordenQuery", max(padre_id) "padreId"
+                        from erco.esgvw_opcion_usuario 
+                        where usuario = '${user}' 
+                        and aplicacion_id = 'Devac'
+                        and tipo = 'M'
+                        and habilitar_opcion = 'S'
+                        group by menu_id
+                        order by "ordenQuery"`
+        const result = await manager.query(query);
+        return result
+    }
+
+
+
 }

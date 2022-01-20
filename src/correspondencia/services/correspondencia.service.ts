@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from "moment";
 import { Repository, getManager } from 'typeorm';
 import {  Estado } from '../entities/estado.entity'
+import {  TipoOficio } from '../entities/tipoOficio.entity'
 
 @Injectable()
 export class CorrespondenciaService {
@@ -41,7 +42,9 @@ export class CorrespondenciaService {
             }
 
             //Si es la primera consulta, entonces se consulta el total de sumillas pendientes del area
-            if (ppagina === 1 && pestado === 'T'){
+
+            if (ppagina == 1 && pestado === 'T'){
+                console.log('Buscando en espera')
                 let query = `select count(*) "totalEnEspera" from erco.vw_oficio_sumilla sumi
                 join erco.cr_departamentos_n dep on dep.id_departamento = sumi_id_dpto 
                 where sumillado='S' and dep.direccion_id = ${pdireccionId} and  sumi_estado_usuarios = 'S'`
@@ -333,7 +336,6 @@ export class CorrespondenciaService {
                         where e.estado= 'A'
                         and e.usuario like '%${pbuscar}%'
                         or e.empleado like '%${pbuscar}%'
-                        and rownum < 10
                         union all
                         select 'E' tipo, id_usuario, nombre_usuario, d.descripcion, d.id_departamento, usu_codigo
                         from cr_usuarios_departamentos u
@@ -341,8 +343,8 @@ export class CorrespondenciaService {
                         where 
                         id_usuario like '%${pbuscar}%' 
                         or nombre_usuario like '%${pbuscar}%'
-                        and rownum < 10
-                        )`
+                        )
+                        fetch first 10 rows only`
             const result = await getManager().query(query);
             return result;
         } catch (error) {
