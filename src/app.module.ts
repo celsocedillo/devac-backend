@@ -10,7 +10,6 @@ import { CorrespondenciaModule } from './correspondencia/correspondencia.module'
 import { ActivosModule } from './activos/activos.module';
 import config from './config';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({

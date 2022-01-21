@@ -13,6 +13,7 @@ export default registerAs('config', () => {
       user: process.env.ORACLE_USER,
       host: process.env.ORACLE_HOST,
     },
+    serverPort: process.env.SERVER_PORT,
     apiKey: process.env.API_KEY,
     jwtSecret: process.env.JWT_SECRET
   };

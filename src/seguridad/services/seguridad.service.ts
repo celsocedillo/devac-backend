@@ -48,7 +48,6 @@ export class SeguridadService {
                 datos = {...empleado, usuarioSecretaria: true};
             }
             return datos; 
-
         return empleado;
     }
 
