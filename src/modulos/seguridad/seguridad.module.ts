@@ -8,7 +8,7 @@ import { SeguridadService } from './services/seguridad.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy'
 import {Empleado} from './entities/empleado.entity';
-import config from './../config';
+import config from '../../config';
 
 @Module({
   imports:[

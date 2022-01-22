@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { GeneralesModule } from './generales/generales.module';
+import { GeneralesModule } from './modulos/generales/generales.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { enviroments } from './enviroments';
-import { SeguridadModule } from './seguridad/seguridad.module';
-import { CorrespondenciaModule } from './correspondencia/correspondencia.module';
-import { ActivosModule } from './activos/activos.module';
+import { SeguridadModule } from './modulos/seguridad/seguridad.module';
+import { CorrespondenciaModule } from './modulos/correspondencia/correspondencia.module';
+import { ActivosModule } from './modulos/activos/activos.module';
 import config from './config';
 
 @Module({

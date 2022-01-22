@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getManager } from 'typeorm';
 
 import { JwtService } from '@nestjs/jwt';
-import config from '../../config';
+import config from '../../../config';
 import {Empleado} from '../entities/empleado.entity'
 
 
