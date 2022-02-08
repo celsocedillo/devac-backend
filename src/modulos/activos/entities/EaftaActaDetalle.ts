@@ -77,6 +77,6 @@ export class EaftaActaDetalle {
 
   @ManyToOne(() => VwActivoGeneral, (vwActivoGeneral) => vwActivoGeneral.actaDetalles)
   @JoinColumn([{ name: "ACTIVO_ID", referencedColumnName: "activoId" }])
-  activo: EaftaActa;
+  activo: VwActivoGeneral;
 
 }

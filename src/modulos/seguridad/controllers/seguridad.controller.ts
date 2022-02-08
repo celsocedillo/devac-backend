@@ -38,7 +38,6 @@ export class SeguridadController {
         return this.seguridadService.getOpcionesByUsuario(usuario);
     }
 
-
     @Get('modulosUsuario/:usuario')
     async getModulosUsuario(@Param('usuario') usuario: string){
         return this.seguridadService.getModulosByUsuario(usuario);

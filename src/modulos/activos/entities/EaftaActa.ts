@@ -6,6 +6,7 @@ import { EaftaEstadoSituacion } from "./EaftaEstadoSituacion";
 @Index("EAFCN_ACTA_PK", ["actaId"], { unique: true })
 @Entity("EAFTA_ACTA")
 export class EaftaActa {
+  
   @Column("number", {
     name: "ACTA_ID_REFERENCIA",
     nullable: true,

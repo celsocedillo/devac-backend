@@ -1,5 +1,7 @@
 import { Column, Entity, Index, OneToMany, ManyToOne, JoinColumn } from "typeorm";
 import { EaftaActaDetalle } from "./EaftaActaDetalle";
+import { EaftaEntregaRecepcionDetalle } from './EaftaEntregaRecepcionDetalle'
+import { EaftaCustodio } from './EaftaCustodio'
 
 //@Index("EAFCN_ACTA_PK", ["actaId"], { unique: true })
 @Entity("VW_ACTIVO_GENERAL")
@@ -98,6 +100,17 @@ export class VwActivoGeneral {
   )
   actaDetalles: EaftaActaDetalle[];
 
+  @OneToMany(
+    () => EaftaEntregaRecepcionDetalle,
+    (eaftaEntregaRecepcionDetalle) => eaftaEntregaRecepcionDetalle.activo
+  )
+  entregaRecepcionDetalle: EaftaActaDetalle[];
+
+  @OneToMany(
+    () => EaftaCustodio,
+    (eaftaCustodio) => eaftaCustodio.activo
+  )
+  custodio: EaftaCustodio[];
   
 
 }
