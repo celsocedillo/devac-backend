@@ -15,8 +15,9 @@ export class GestionCustodioController {
         return this.gestionCustodioService.getActa(id);
     }
 
-    @Get('activosCustodio/:custodioId')
+    @Get('activosUsuario/:custodioId')
     getActivosCustodio(@Param('custodioId') custodioId: number){
         return this.gestionCustodioService.getActivosByCustodio(custodioId);
     }
+    
 }
