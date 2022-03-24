@@ -3,10 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getManager } from 'typeorm';
 
 import { Tipos } from '../entities/tipo.entity';
+import { VwEmpleado } from '../entities/vwEmpleado.entity'
 
 @Injectable()
 export class GeneralesService {
-    constructor(@InjectRepository(Tipos) private tiposRepo: Repository<Tipos>) {}
+    constructor(@InjectRepository(Tipos) private tiposRepo: Repository<Tipos>,
+                @InjectRepository(VwEmpleado) private vwEmpleadoRepo: Repository<VwEmpleado>) {
+
+    }
 
     async findTiposGeneralAll() {
         const manager = getManager();
@@ -27,6 +31,14 @@ export class GeneralesService {
     createTipo(data: any){
         const newRecord = this.tiposRepo.create(data);
         return this.tiposRepo.save(newRecord);
+    }
+
+    async getEmpleadosByFiltro(pfiltro : string){
+        return await this.vwEmpleadoRepo.createQueryBuilder('empleados')
+        .select(['empleados'])
+        .where("empleados.empleado like :filtro", {filtro: `%${pfiltro.toUpperCase()}%`})
+        .take(10)
+        .getMany()
     }
 
     async updateTipo(changes: any){

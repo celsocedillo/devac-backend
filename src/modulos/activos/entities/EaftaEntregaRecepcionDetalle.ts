@@ -51,7 +51,7 @@ export class EaftaEntregaRecepcionDetalle {
   areaId: number | null;
 
   @ManyToOne(() => EaftaEntregaRecepcion, (eaftaEntregaRecepcion) => eaftaEntregaRecepcion.detalle)
-  @JoinColumn([{ name: "ACTA_ID", referencedColumnName: "actaId" }])
+  @JoinColumn([{ name: "ACTA_ID", referencedColumnName: "actaId" }, { name: "ACTA_ANIO", referencedColumnName: "actaAnio" }])
   acta: EaftaEntregaRecepcion;
 
   @ManyToOne(() => VwActivoGeneral, (vwActivoGeneral) => vwActivoGeneral.entregaRecepcionDetalle)

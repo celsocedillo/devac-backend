@@ -17,6 +17,12 @@ export class GeneralesController {
       return this.generalesService.findTipoByTipo(tipoId);
     }
 
+
+    @Get('empleado/filtro/:filtro')
+    getEmpleadoByFiltro(@Param('filtro') filtro: string){
+      return this.generalesService.getEmpleadosByFiltro(filtro);
+    }
+
     @Post('tipo')
     createTipo(@Body() payload: any){
       return this.generalesService.createTipo(payload);

@@ -4,7 +4,7 @@ import { Empleado } from '../../seguridad/entities/empleado.entity'
 
 
 
-@Index("EAFCN_ENTREC_PK", ["actaId"], { unique: true })
+@Index("EAFCN_ENTREC_PK", ["actaId", "actaAnio"], { unique: true })
 @Entity("EAFTA_ENTREGA_RECEPCION")
 export class EaftaEntregaRecepcion {
 
@@ -14,13 +14,18 @@ export class EaftaEntregaRecepcion {
   })
   actaId: number;
       
-  @Column("number", {
-    name: "ACTA_ANIO",
-    nullable: true,
-    precision: 4,
-    scale: 0,
+  @PrimaryGeneratedColumn({
+    type: "number",
+    name: "ACTA_ANIO"
   })
   actaAnio: number | null;
+  // @Column("number", {
+  //   name: "ACTA_ANIO",
+  //   nullable: true,
+  //   precision: 4,
+  //   scale: 0,
+  // })
+  // actaAnio: number | null;
 
   @Column("date", { name: "FECHA_ACTA" })
   fechaActa: Date | null;
