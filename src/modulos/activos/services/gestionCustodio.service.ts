@@ -101,7 +101,6 @@ export class GestionCustodioService {
             fechaIngresa: moment(new Date()).format('YYYY-MM-DD'),
             detalle:[]
         }
-        console.log('antes de ingresar', newRecord);
         await this.entregaRecepcionRepository.save(newRecord);
         let detalle = [];
         for (let i = 0; i < data.detalle.length; i++){
@@ -116,9 +115,10 @@ export class GestionCustodioService {
     }
 
     async updateSolicitudCambioEstado(data: UpdateSolicituCambioCustodioDto){
-       const registro = await this.entregaRecepcionRepository.findOne({where : {actaId: data.actaId, actaAnio: data.actaAnio}});
+       let registro = await this.entregaRecepcionRepository.findOne({where : {actaId: data.actaId, actaAnio: data.actaAnio}});
        this.entregaRecepcionRepository.merge(registro, data);
-       return this.entregaRecepcionRepository.save(registro);
+       const {detalle, ...actualizar} = registro
+       return this.entregaRecepcionRepository.save(actualizar);
     }
 
     //async createDetalleSolicitudCambioEstado(activoId: number, actaId: number, actaAnio: number){
@@ -159,6 +159,14 @@ export class GestionCustodioService {
         .where("empleado.usuario = :usuario", {usuario: usuario})
         .getOne()
         console.log("administrador", administrativo.direccionId);
+        return  await this.entregaRecepcionRepository
+        .createQueryBuilder("acta")
+        .leftJoinAndMapOne('acta.empleadoRecepta', Empleado, 'empleadoRecepta', 'acta.empleadoReceptaId = empleadoRecepta.codigo')
+        .leftJoinAndMapOne('acta.empleadoEntrega', Empleado, 'empleadoEntrega', 'acta.empleadoEntregaId = empleadoEntrega.codigo')
+        .where('acta.direccionId = :direccionId', {direccionId: administrativo.direccionId})
+        .select(["acta", 'empleadoRecepta.empleado', 'empleadoEntrega.empleado', 'empleadoRecepta.direccionId'])        
+        .orderBy('acta.fechaIngresa', 'DESC')
+        .getMany();
     }
 
 }
