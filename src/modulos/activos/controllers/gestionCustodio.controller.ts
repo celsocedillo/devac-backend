@@ -51,6 +51,10 @@ export class GestionCustodioController {
         return this.gestionCustodioService.deleteDetalleSolicitudCambioEstado(id);
     }
 
+    @Get('/actas/administrativo/:usuario')
+    getListaActasCambioCustodioByAdministrativo(@Param('usuario') usuario: string){
+        return this.gestionCustodioService.getListaSolicitudCambioCustodioByAdminitrador(usuario);
+    }
 
     
 }

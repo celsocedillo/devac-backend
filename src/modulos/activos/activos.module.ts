@@ -18,6 +18,7 @@ import { EaftaEntregaRecepcionDetalle } from './entities/EaftaEntregaRecepcionDe
 import { EaftaCustodio } from './entities/EaftaCustodio'
 
 import { Empleado } from '../seguridad/entities/empleado.entity'
+import { VwEmpleado } from '../generales/entities/vwEmpleado.entity'
 
 @Module({
   imports: [TypeOrmModule.forFeature(
@@ -25,6 +26,7 @@ import { Empleado } from '../seguridad/entities/empleado.entity'
      EaftaActaDetalle, 
      EaftaEstadoSituacion, 
      VwActivoGeneral, 
+     VwEmpleado,
      EaftaPermisoEstado,
      EaftaEntregaRecepcion,
      EaftaEntregaRecepcionDetalle,

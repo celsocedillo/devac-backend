@@ -65,6 +65,13 @@ export class EaftaEntregaRecepcion {
   @Column("varchar2", { name: "TIPO", length: 2 })
   tipo: string | null;
 
+  @Column("number", {
+    name: "DIRECCION_ID",
+    precision: 4,
+    scale: 0,
+  })
+  direccionId: number | null;
+
   @OneToMany(
     () => EaftaEntregaRecepcionDetalle,
     (eaftaEntregaRecepcionDetalle) => eaftaEntregaRecepcionDetalle.acta

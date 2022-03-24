@@ -23,6 +23,11 @@ export class CreateSolicituCambioCustodioDto{
     @IsNotEmpty()
     readonly estado: string | null;
 
+    @IsNumber()
+    @IsNotEmpty()
+    readonly direccionId: number;
+
+
     readonly detalle: CreateDetalleSolicitudCambioCustodioDto[]
     
 }

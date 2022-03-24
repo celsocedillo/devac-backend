@@ -5,6 +5,7 @@ import { Repository, getManager, RepositoryNotFoundError } from 'typeorm';
 import { EaftaEntregaRecepcion} from '../entities/EaftaEntregaRecepcion'
 import { EaftaEntregaRecepcionDetalle } from '../entities/EaftaEntregaRecepcionDetalle'
 import { VwActivoGeneral } from '../entities/VwActivoGeneral'
+import { VwEmpleado } from '../../generales/entities/vwEmpleado.entity'
 import { EaftaCustodio } from '../entities/EaftaCustodio'
 import { Empleado } from '../../seguridad/entities/empleado.entity'
 import { CreateSolicituCambioCustodioDto, UpdateSolicituCambioCustodioDto, 
@@ -18,6 +19,7 @@ export class GestionCustodioService {
                  @InjectRepository(EaftaEntregaRecepcionDetalle) private entregaRecepcionDetalleRepository: Repository<EaftaEntregaRecepcionDetalle>,
                  @InjectRepository(EaftaCustodio) private custodioRepository: Repository<EaftaCustodio>,
                  @InjectRepository(Empleado) private empleadoRepository: Repository<Empleado>,
+                 @InjectRepository(VwEmpleado) private vwEmpleadoRepository: Repository<VwEmpleado>,
                 ){
     }
 
@@ -150,4 +152,13 @@ export class GestionCustodioService {
         if (resultado?.secuencia) return resultado.secuencia
         else return 0
     }
+
+    async getListaSolicitudCambioCustodioByAdminitrador(usuario: string){
+        let administrativo = await this.vwEmpleadoRepository.createQueryBuilder("empleado")
+        .select("empleado")
+        .where("empleado.usuario = :usuario", {usuario: usuario})
+        .getOne()
+        console.log("administrador", administrativo.direccionId);
+    }
+
 }
