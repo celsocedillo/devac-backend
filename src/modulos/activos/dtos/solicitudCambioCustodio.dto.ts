@@ -45,6 +45,9 @@ export class UpdateSolicituCambioCustodioDto extends PartialType(CreateSolicituC
     @IsString()
     readonly usuarioAprueba: string | null;
 
+    @IsDate()
+    readonly fechaAprueba: Date 
+
 }
 
 
@@ -66,5 +69,37 @@ export class UpdateDetalleSolicitudCambioCustodioDto extends PartialType(CreateD
     @IsNumber()
     @IsNotEmpty()
     readonly actadetId: number;
+
+    @IsNumber()
+    readonly areaId: number;
+
+}
+
+export class CreateActivoCustodioDto{
+    
+    @IsNumber()
+    @IsNotEmpty()
+    custodioPersonaId: number | null;
+
+    @IsNumber()
+    @IsNotEmpty()
+    activoId: number | null;
+
+    @IsString()
+    observacion: string | null;
+  
+    @IsString()
+    @IsNotEmpty()
+    usuarioIngresa: string | null;
+  
+    @IsString()
+    @IsNotEmpty()
+    estado: string | null;
+}
+
+export class UpdateActivoCustodioDto extends PartialType(CreateActivoCustodioDto){
+    @IsNumber()
+    @IsNotEmpty()
+    custodioId: number | null;
 
 }

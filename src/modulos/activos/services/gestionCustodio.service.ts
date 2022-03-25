@@ -8,8 +8,12 @@ import { VwActivoGeneral } from '../entities/VwActivoGeneral'
 import { VwEmpleado } from '../../generales/entities/vwEmpleado.entity'
 import { EaftaCustodio } from '../entities/EaftaCustodio'
 import { Empleado } from '../../seguridad/entities/empleado.entity'
-import { CreateSolicituCambioCustodioDto, UpdateSolicituCambioCustodioDto, 
-         CreateDetalleSolicitudCambioCustodioDto } from '../dtos/solicitudCambioCustodio.dto'
+import { CreateSolicituCambioCustodioDto, 
+         UpdateSolicituCambioCustodioDto, 
+         CreateDetalleSolicitudCambioCustodioDto,
+         UpdateDetalleSolicitudCambioCustodioDto,
+         CreateActivoCustodioDto,
+         UpdateActivoCustodioDto } from '../dtos/solicitudCambioCustodio.dto'
 
 
 @Injectable()
@@ -169,4 +173,69 @@ export class GestionCustodioService {
         .getMany();
     }
 
+    async apruebaSolicitudCambioCustodio(actaAnio: number, actaId: number, usuarioAprueba: string){
+        let acta = await this.entregaRecepcionRepository.findOne({where : {actaId: actaId, actaAnio: actaAnio}});
+
+
+        //Procesa los activos
+        acta.detalle.map( async  i =>{
+            //Busca el actual custodio
+            let activoCustodio = await this.custodioRepository.findOne({where: [{
+                activoId: i.activoId,
+                estado: 'A'}]
+            })
+            activoCustodio.estado = 'I'
+            //Inactivo el actual custodio
+            await this.updateActivoCustodio(activoCustodio);
+            //Se crea el nuevo registro para el nuevo custodio
+            let nuevoCustodio = {
+                custodioPersonaId: acta.empleadoReceptaId,
+                activoId: i.activoId,
+                observacion: '',
+                usuarioIngresa: acta.usuarioAprueba,
+                estado: 'A'
+            }
+            await this.createActivoCustodio(nuevoCustodio);
+        })
+
+        //se deja a un lado el detalle
+        let {detalle, ...actualizar } = acta;
+
+        actualizar = {...actualizar, 
+            estado : 'AP',
+            usuarioAprueba: usuarioAprueba,
+            fechaAprueba: new Date()
+        }
+
+
+    }
+
+    async aprobarDetalleSolicitudCambioCustodio(payload: UpdateDetalleSolicitudCambioCustodioDto){
+        let registro = await this.entregaRecepcionDetalleRepository.findOne({where : {actadetId: payload.actadetId}});
+        this.entregaRecepcionDetalleRepository.merge(registro, payload);
+        return this.entregaRecepcionDetalleRepository.save(registro);
+    }
+
+    async createActivoCustodio(payload: CreateActivoCustodioDto){
+        let registro = {...payload,
+            custodioId: await this.getNextValSecuencia('EAFTA_CUSTODIO'),
+            fechaIngresa: moment(new Date()).format('YYYY-MM-DD')
+        }
+        return this.custodioRepository.save(registro);
+    }
+
+    async updateActivoCustodio(payload: UpdateActivoCustodioDto){
+        let registro = await this.custodioRepository.findOne({where: {custodioId: payload.custodioId}})
+        this.custodioRepository.merge(registro, payload);
+        return await this.custodioRepository.save(registro);
+    }
+
+    async getNextValSecuencia(objetoSecuencia: string){
+        let qrySecuencia = `select ${objetoSecuencia}.nextval from dual`
+        const resSecuencia = await getManager().query(qrySecuencia);
+        return resSecuencia[0].NEXTVAL;
+    }
+
+    
+    
 }

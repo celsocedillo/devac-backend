@@ -19,13 +19,6 @@ export class EaftaEntregaRecepcion {
     name: "ACTA_ANIO"
   })
   actaAnio: number | null;
-  // @Column("number", {
-  //   name: "ACTA_ANIO",
-  //   nullable: true,
-  //   precision: 4,
-  //   scale: 0,
-  // })
-  // actaAnio: number | null;
 
   @Column("date", { name: "FECHA_ACTA" })
   fechaActa: Date | null;
