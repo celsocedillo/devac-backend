@@ -15,6 +15,9 @@ export default registerAs('config', () => {
     },
     serverPort: process.env.SERVER_PORT,
     apiKey: process.env.API_KEY,
-    jwtSecret: process.env.JWT_SECRET
+    jwtSecret: process.env.JWT_SECRET,
+    rutaReportes : "C:\\Emapag\\Projects\\java\\generadorPDF\\reportes\\tmp",
+    rutaPDF: "C:\\Emapag\\Projects\\Recaudaciones\\PDF",
+
   };
 });

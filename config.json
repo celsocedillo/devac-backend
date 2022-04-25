@@ -1,0 +1,6 @@
+{
+    "puertoAPI" : 3010,
+    "rutaReportes" : "C:\\Emapag\\Projects\\java\\generadorPDF\\reportes\\tmp",
+    "rutaPDF": "C:\\Emapag\\Projects\\Recaudaciones\\PDF",
+    "utilsFolder": "C:\\Emapag\\Projects\\node\\utils\\sendEmail"
+}

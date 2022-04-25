@@ -4,6 +4,7 @@ import * as moment from "moment";
 import { Repository, getManager, RepositoryNotFoundError } from 'typeorm';
 import { EaftaEntregaRecepcion} from '../entities/EaftaEntregaRecepcion'
 import { EaftaEntregaRecepcionDetalle } from '../entities/EaftaEntregaRecepcionDetalle'
+import { EaftaArea } from '../entities/EaftaArea';
 import { VwActivoGeneral } from '../entities/VwActivoGeneral'
 import { VwEmpleado } from '../../generales/entities/vwEmpleado.entity'
 import { EaftaCustodio } from '../entities/EaftaCustodio'
@@ -24,6 +25,7 @@ export class GestionCustodioService {
                  @InjectRepository(EaftaCustodio) private custodioRepository: Repository<EaftaCustodio>,
                  @InjectRepository(Empleado) private empleadoRepository: Repository<Empleado>,
                  @InjectRepository(VwEmpleado) private vwEmpleadoRepository: Repository<VwEmpleado>,
+                 @InjectRepository(EaftaArea) private areaRepository: Repository<EaftaArea>,
                 ){
     }
 
@@ -62,6 +64,7 @@ export class GestionCustodioService {
     async getActivosByCustodio(custodioId: number){
         return await this.custodioRepository.createQueryBuilder('activosCustodio')
         .where('activosCustodio.custodioPersonaId = :custodioId', {custodioId : custodioId})
+        .andWhere("activosCustodio.estado = 'A'")
         .leftJoin('activosCustodio.activo', 'activo')
         .select(['activosCustodio', 
                  'activo.tipoActivo',
@@ -138,6 +141,29 @@ export class GestionCustodioService {
         })
     }
 
+    async areaDetalleSolicitudCambioEstado(actadetId: number, actaAnio: number, actaId: number, areaId: number, todos: boolean){
+        if (todos){
+            // let query = this.entregaRecepcionDetalleRepository.createQueryBuilder()
+            // .update(EaftaEntregaRecepcionDetalle)
+            // .set({areaId: areaId})
+            // .where("actaAnio = :actaAnio", {actaAnio: actaAnio})
+            // .andWhere("actaId = :actaId", {actaId: actaId})
+            // console.log('update', query.getSql())            
+            // await query.execute()
+            await this.entregaRecepcionDetalleRepository.update({actaAnio: actaAnio, actaId: actaId}, {areaId: areaId} )
+        }else{
+            await this.entregaRecepcionDetalleRepository.update({actadetId: actadetId}, {areaId: areaId} )
+            // let query =  this.entregaRecepcionDetalleRepository.createQueryBuilder()
+            // .update(EaftaEntregaRecepcionDetalle)
+            // .set({areaId: areaId})
+            // .where("actadetId = :actadetId", {actadetId: actadetId})
+            // console.log('update', query.getSql())            
+            // await query.execute()            
+        }
+        return true;
+     }
+ 
+
     async deleteDetalleSolicitudCambioEstado(activodetId: number){
         return await this.entregaRecepcionDetalleRepository.delete(activodetId);
     }
@@ -157,58 +183,81 @@ export class GestionCustodioService {
         else return 0
     }
 
-    async getListaSolicitudCambioCustodioByAdminitrador(usuario: string){
+    async getListaSolicitudCambioCustdioByAdministrador(usuario: string, filtro: any){
+        console.log('filtro', filtro);
+        const {pagina, numeroElementos, estado} = filtro;
         let administrativo = await this.vwEmpleadoRepository.createQueryBuilder("empleado")
         .select("empleado")
         .where("empleado.usuario = :usuario", {usuario: usuario})
         .getOne()
-        console.log("administrador", administrativo.direccionId);
-        return  await this.entregaRecepcionRepository
+
+        const query = this.entregaRecepcionRepository
         .createQueryBuilder("acta")
         .leftJoinAndMapOne('acta.empleadoRecepta', Empleado, 'empleadoRecepta', 'acta.empleadoReceptaId = empleadoRecepta.codigo')
         .leftJoinAndMapOne('acta.empleadoEntrega', Empleado, 'empleadoEntrega', 'acta.empleadoEntregaId = empleadoEntrega.codigo')
         .where('acta.direccionId = :direccionId', {direccionId: administrativo.direccionId})
         .select(["acta", 'empleadoRecepta.empleado', 'empleadoEntrega.empleado', 'empleadoRecepta.direccionId'])        
         .orderBy('acta.fechaIngresa', 'DESC')
-        .getMany();
+
+        if (estado){
+            query.andWhere('acta.estado = :estado', {estado: estado})
+        }
+        const totalRows = await query.getCount();
+        if (pagina){
+            let skip = pagina === 1 ? 0 : ((pagina-1) * numeroElementos)
+            query.skip(skip).take(numeroElementos)
+        }
+        return  {data: await query.getMany(), totalRows};
     }
 
     async apruebaSolicitudCambioCustodio(actaAnio: number, actaId: number, usuarioAprueba: string){
-        let acta = await this.entregaRecepcionRepository.findOne({where : {actaId: actaId, actaAnio: actaAnio}});
-
-
-        //Procesa los activos
-        acta.detalle.map( async  i =>{
-            //Busca el actual custodio
-            let activoCustodio = await this.custodioRepository.findOne({where: [{
-                activoId: i.activoId,
-                estado: 'A'}]
-            })
-            activoCustodio.estado = 'I'
-            //Inactivo el actual custodio
-            await this.updateActivoCustodio(activoCustodio);
-            //Se crea el nuevo registro para el nuevo custodio
-            let nuevoCustodio = {
-                custodioPersonaId: acta.empleadoReceptaId,
-                activoId: i.activoId,
-                observacion: '',
-                usuarioIngresa: acta.usuarioAprueba,
-                estado: 'A'
-            }
-            await this.createActivoCustodio(nuevoCustodio);
-        })
-
-        //se deja a un lado el detalle
-        let {detalle, ...actualizar } = acta;
-
-        actualizar = {...actualizar, 
-            estado : 'AP',
-            usuarioAprueba: usuarioAprueba,
-            fechaAprueba: new Date()
+        try{
+            let query = `begin EAFPR_PROCESA_SOLICITUD_CAMBIO(${actaAnio}, ${actaId}, '${usuarioAprueba}'); end;`
+            const resultado = await getManager().query(query);
+            console.log('resultado', resultado);
+            return true;
+        }catch(err){
+            throw new Error(err);
         }
-
-
     }
+
+    // async apruebaSolicitudCambioCustodio(actaAnio: number, actaId: number, usuarioAprueba: string){
+    //     let acta = await this.entregaRecepcionRepository.findOne({where : {actaId: actaId, actaAnio: actaAnio}});
+
+    //     //Procesa los activos
+    //     acta.detalle.map( async  i =>{
+    //         //Busca el actual custodio
+    //         let activoCustodio = await this.custodioRepository.findOne({where: [{
+    //             activoId: i.activoId,
+    //             estado: 'A'}]
+    //         })
+    //         activoCustodio.estado = 'I'
+    //         //Inactivo el actual custodio
+    //         await this.updateActivoCustodio(activoCustodio);
+    //         //Se crea el nuevo registro para el nuevo custodio
+    //         let nuevoCustodio = {
+    //             custodioPersonaId: acta.empleadoReceptaId,
+    //             activoId: i.activoId,
+    //             observacion: '',
+    //             usuarioIngresa: acta.usuarioAprueba,
+    //             estado: 'A'
+    //         }
+    //         await this.createActivoCustodio(nuevoCustodio);
+    //     })
+
+    //     //se deja a un lado el detalle
+    //     let {detalle, ...actualizar } = acta;
+
+    //     actualizar = {...actualizar, 
+    //         estado : 'AP',
+    //         usuarioAprueba: usuarioAprueba,
+    //         fechaAprueba: new Date()
+    //     }
+
+    //     //Una vez procesado todo el detalle se cambia el estado de la solicitud
+    //     return await this.updateSolicitudCambioEstado(actualizar);
+
+    // }
 
     async aprobarDetalleSolicitudCambioCustodio(payload: UpdateDetalleSolicitudCambioCustodioDto){
         let registro = await this.entregaRecepcionDetalleRepository.findOne({where : {actadetId: payload.actadetId}});
@@ -218,7 +267,7 @@ export class GestionCustodioService {
 
     async createActivoCustodio(payload: CreateActivoCustodioDto){
         let registro = {...payload,
-            custodioId: await this.getNextValSecuencia('EAFTA_CUSTODIO'),
+            custodioId: await this.getNextValSecuencia('EAFSC_CUSTODIO'),
             fechaIngresa: moment(new Date()).format('YYYY-MM-DD')
         }
         return this.custodioRepository.save(registro);
@@ -236,6 +285,11 @@ export class GestionCustodioService {
         return resSecuencia[0].NEXTVAL;
     }
 
-    
+    async getAreas(direccionId: number){
+        return await this.areaRepository.createQueryBuilder('area')
+        .where('area.departamentoId = :direccionId', {direccionId : direccionId})
+        .andWhere("area.estado = 'A'")
+        .getMany()
+    }
     
 }

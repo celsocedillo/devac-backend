@@ -1,0 +1,6 @@
+rutareportes=C:\\Emapag\\Projects\\java\\generadorPDF\\reportes
+host=192.198.12.200
+puerto=1522
+sid=oradesa
+usuario=erco
+password=ERCO
